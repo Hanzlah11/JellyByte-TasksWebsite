@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Tasks — JellyByte Studios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Nastaliq+Urdu&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0608;
+  --surface: #120b0f;
+  --surface2: #1a0f14;
+  --surface3: #221419;
+  --border: rgba(220,50,100,0.1);
+  --border2: rgba(220,50,100,0.2);
+  --primary: #e8185a;
+  --primary-dim: rgba(232,24,90,0.12);
+  --primary-glow: rgba(232,24,90,0.3);
+  --primary-bright: #ff3575;
+  --magenta: #c8186a;
+  --pink: #ff6ba8;
+  --accent: #ff9ecb;
+  --green: #3ecf72;
+  --green-dim: rgba(62,207,114,0.12);
+  --yellow: #f0c050;
+  --blue: #4a9eff;
+  --red: #ff4444;
+  --text: #f0e0e8;
+  --text2: #c0a0b0;
+  --muted: #6a4a58;
+  --muted2: #2a1520;
+  --muted3: #3a1e28;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(232,24,90,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 100%, rgba(200,24,106,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(10,6,8,0) 0%, rgba(10,6,8,0.4) 100%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── NAV ── */
+#global-nav {
+  position:fixed; top:0; left:0; right:0; height:58px;
+  background: rgba(10,6,8,0.96);
+  border-bottom: 1px solid var(--border2);
+  display:flex; align-items:center;
+  z-index:9000; padding:0 24px;
+  backdrop-filter:blur(16px);
+}
+.nav-logo {
+  display:flex; align-items:center; gap:10px;
+  margin-right:32px; flex-shrink:0;
+  text-decoration:none;
+}
+.nav-logo-cube {
+  width:28px; height:28px;
+  background: linear-gradient(135deg, var(--primary), var(--magenta));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.6rem; color:#fff; font-weight:700;
+  box-shadow: 0 0 16px var(--primary-glow);
+  animation: logoGlow 3s ease-in-out infinite;
+}
+@keyframes logoGlow {
+  0%,100% { box-shadow:0 0 12px var(--primary-glow); }
+  50% { box-shadow:0 0 24px var(--primary-glow), 0 0 40px rgba(232,24,90,0.15); }
+}
+.nav-logo-text {
+  font-family:'Syne',sans-serif;
+  font-size:0.78rem; font-weight:800;
+  letter-spacing:3px;
+  background: linear-gradient(90deg, var(--primary-bright), var(--pink));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.nav-links { display:flex; align-items:center; gap:2px; flex:1; }
+.nav-link {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 14px; text-decoration:none;
+  color: var(--muted); font-size:0.68rem;
+  letter-spacing:2px; text-transform:uppercase;
+  border:1px solid transparent;
+  transition:all 0.2s; border-radius:2px;
+}
+.nav-link:hover { color:var(--text2); border-color:var(--border); background:var(--primary-dim); }
+.nav-link.active {
+  color:var(--primary-bright);
+  border-color:var(--border2);
+  background:var(--primary-dim);
+}
+.nav-clock {
+  font-size:0.82rem; color:var(--muted);
+  letter-spacing:3px; margin-left:auto;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── LAYOUT ── */
+.page { max-width:1100px; margin:0 auto; padding:78px 20px 60px; position:relative; z-index:1; }
+
+.page-header { margin-bottom:28px; display:flex; align-items:flex-end; justify-content:space-between; }
+.page-title {
+  font-family:'Syne',sans-serif;
+  font-size:2rem; font-weight:800;
+  background: linear-gradient(135deg, #fff 30%, var(--pink));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:-0.5px;
+}
+.page-sub { font-size:0.62rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-top:4px; }
+
+/* ── REMINDER BANNER ── */
+#reminder-banner {
+  background: linear-gradient(135deg, rgba(232,24,90,0.06), rgba(200,24,106,0.03));
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--primary);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex; gap: 16px; align-items: flex-start;
+  animation: fadeSlide 0.5s ease;
+  position:relative;
+}
+@keyframes fadeSlide { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.reminder-icon { font-size: 1.4rem; flex-shrink:0; margin-top:2px; }
+.reminder-body { flex:1; }
+.reminder-label {
+  font-size:0.55rem; letter-spacing:4px; text-transform:uppercase;
+  color:var(--primary); margin-bottom:6px;
+}
+.reminder-arabic {
+  font-family:'Noto Nastaliq Urdu',serif;
+  font-size:1.05rem; color:var(--pink);
+  direction:rtl; line-height:1.9; margin-bottom:6px;
+}
+.reminder-text {
+  font-family:'Lora',serif;
+  font-size:0.88rem; color:var(--text2);
+  line-height:1.6; font-style:italic;
+}
+.reminder-source { font-size:0.6rem; letter-spacing:2px; color:var(--muted); margin-top:6px; }
+.reminder-next {
+  position:absolute; top:12px; right:12px;
+  background:none; border:1px solid var(--muted2);
+  color:var(--muted); font-family:'JetBrains Mono',monospace;
+  font-size:0.58rem; letter-spacing:2px; padding:4px 10px;
+  cursor:pointer; transition:all 0.2s;
+}
+.reminder-next:hover { border-color:var(--primary); color:var(--primary-bright); }
+
+/* ── STATUS BAR ── */
+#status-bar {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-left:3px solid var(--green);
+  padding:12px 18px;
+  display:flex; gap:14px; align-items:center;
+  margin-bottom:14px;
+  transition:border-color 0.3s, background 0.3s;
+}
+#status-bar.idle { border-left-color:var(--muted2); }
+#status-bar.soon { border-left-color:var(--yellow); }
+#status-bar.overdue { border-left-color:var(--red); background:rgba(255,68,68,0.04); }
+.s-dot { width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0;animation:blink 1.4s infinite; }
+#status-bar.idle .s-dot{background:var(--muted);box-shadow:none;animation:none;}
+#status-bar.soon .s-dot{background:var(--yellow);box-shadow:0 0 8px var(--yellow);}
+#status-bar.overdue .s-dot{background:var(--red);box-shadow:0 0 8px var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+.s-lbl { font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:2px; }
+#s-msg { font-size:0.9rem;font-weight:500; }
+
+#prog-wrap { background:var(--muted2);height:2px;margin-bottom:24px;overflow:hidden; }
+#prog-fill { height:100%;background:linear-gradient(90deg,var(--primary),var(--pink));transition:width 0.8s ease;width:0; }
+
+/* ── STATS ── */
+.stats { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px; }
+.stat {
+  background:var(--surface);border:1px solid var(--border);
+  padding:16px 12px;text-align:center;
+  position:relative; overflow:hidden;
+  transition:border-color 0.2s;
+}
+.stat::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, var(--primary-dim), transparent);
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.stat:hover::before { opacity:1; }
+.stat:hover { border-color:var(--border2); }
+.stat-n {
+  font-family:'Syne',sans-serif;
+  font-size:1.8rem; font-weight:800;
+  color:var(--primary-bright);
+  position:relative; z-index:1;
+}
+.stat-l { font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:3px;position:relative;z-index:1; }
+
+/* ── GRID ── */
+.grid { display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start; }
+@media(max-width:720px){.grid{grid-template-columns:1fr;}}
+
+.section-hd {
+  font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-hd::after { content:'';flex:1;height:1px;background:var(--border); }
+
+/* ── TASK CARDS ── */
+.task-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-left:3px solid var(--muted2);
+  padding:14px 16px;
+  display:grid;grid-template-columns:72px 1fr auto auto auto;
+  gap:10px;align-items:center;
+  margin-bottom:6px;
+  transition:all 0.3s;
+  position:relative;
+}
+.task-card::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(90deg, var(--primary-dim), transparent 40%);
+  opacity:0; transition:opacity 0.2s; pointer-events:none;
+}
+.task-card:hover::after { opacity:1; }
+.task-card.active {
+  border-left-color:var(--green);
+  background:rgba(62,207,114,0.04);
+  animation:activePulse 3s infinite;
+}
+@keyframes activePulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 20px rgba(62,207,114,0.08)}}
+.task-card.soon-c { border-left-color:var(--yellow); }
+.task-card.done   { border-left-color:var(--muted2);opacity:0.35; }
+.task-card.overdue-c { border-left-color:var(--red); background:rgba(255,68,68,0.03); }
+
+.t-time { font-size:0.65rem;color:var(--muted);line-height:1.8; }
+.t-name { font-size:0.95rem;font-weight:500; color:var(--text2); }
+.task-card.active .t-name { color:var(--green); }
+.task-card.done .t-name { text-decoration:line-through; }
+
+.t-tag { font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border:1px solid; border-radius:1px; }
+.tag-class   { color:var(--blue);   border-color:rgba(74,158,255,0.25); }
+.tag-prayer  { color:var(--pink);   border-color:rgba(255,107,168,0.25); }
+.tag-personal{ color:#c090f0;       border-color:rgba(192,144,240,0.25); }
+.tag-break   { color:var(--muted);  border-color:rgba(106,74,88,0.25); }
+
+/* Done button — MANUAL */
+.t-done-btn {
+  background:none; border:1px solid var(--muted2);
+  color:var(--muted); cursor:pointer;
+  width:26px; height:26px; font-size:0.75rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; flex-shrink:0; border-radius:2px;
+}
+.t-done-btn:hover { border-color:var(--green); color:var(--green); background:var(--green-dim); }
+.task-card.done .t-done-btn { border-color:var(--green); color:var(--green); background:var(--green-dim); }
+
+.t-del { background:none;border:none;color:var(--muted2);cursor:pointer;font-size:0.85rem;padding:4px 6px;transition:color 0.2s; }
+.t-del:hover { color:var(--red); }
+
+/* ── ADD PANEL ── */
+.add-panel {
+  background:var(--surface);
+  border:1px solid var(--border2);
+  padding:22px; position:sticky; top:76px;
+  box-shadow: 0 0 40px rgba(232,24,90,0.05);
+}
+.add-title {
+  font-family:'Syne',sans-serif;
+  font-size:0.95rem; font-weight:700;
+  color:var(--primary-bright); letter-spacing:2px;
+  margin-bottom:18px;
+}
+.field { margin-bottom:12px; }
+.field label {
+  display:block; font-size:0.55rem;
+  letter-spacing:3px; text-transform:uppercase;
+  color:var(--muted); margin-bottom:5px;
+}
+.field input,.field select {
+  width:100%;
+  background:var(--bg);
+  border:1px solid var(--muted2);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.85rem; padding:9px 12px;
+  outline:none; transition:all 0.2s;
+}
+.field input:focus,.field select:focus {
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px var(--primary-dim);
+}
+.field input::placeholder { color:var(--muted); }
+.field select option { background:var(--surface2); }
+.time-row { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.emoji-row { display:flex;flex-wrap:wrap;gap:5px;margin-top:5px; }
+.e-btn {
+  background:var(--bg); border:1px solid var(--muted2);
+  width:34px; height:34px; font-size:1rem;
+  cursor:pointer; transition:all 0.15s;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:2px;
+}
+.e-btn:hover { border-color:var(--primary);transform:scale(1.1); }
+.e-btn.sel { border-color:var(--primary);background:var(--primary-dim); box-shadow:0 0 8px var(--primary-glow); }
+
+.btn-add {
+  width:100%;
+  background: linear-gradient(135deg, var(--primary), var(--magenta));
+  border:none; color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem; letter-spacing:3px; text-transform:uppercase;
+  padding:12px; cursor:pointer;
+  transition:all 0.2s; margin-top:6px; font-weight:500;
+  position:relative; overflow:hidden;
+}
+.btn-add::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, var(--primary-bright), var(--pink));
+  opacity:0; transition:opacity 0.2s;
+}
+.btn-add:hover::before { opacity:1; }
+.btn-add:hover { box-shadow:0 0 24px var(--primary-glow); }
+.btn-add span { position:relative; z-index:1; }
+
+.sep { border:none;border-top:1px solid var(--border);margin:14px 0; }
+.btn-clear {
+  width:100%; background:none;
+  border:1px solid var(--muted2); color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.6rem; letter-spacing:3px; text-transform:uppercase;
+  padding:8px; cursor:pointer; transition:all 0.2s;
+}
+.btn-clear:hover { border-color:var(--red);color:var(--red); }
+
+#empty {
+  text-align:center;padding:56px 20px;
+  color:var(--muted);font-size:0.68rem;letter-spacing:3px;display:none;
+}
+#empty.show{display:block;}
+
+/* ── OVERDUE MODAL ── */
+#overdue-modal {
+  display:none;
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  z-index:9500;
+  align-items:center; justify-content:center;
+  padding:20px;
+}
+#overdue-modal.show { display:flex; }
+.od-box {
+  background:var(--surface);
+  border:1px solid rgba(232,24,90,0.4);
+  border-top:3px solid var(--primary);
+  padding:32px 28px;
+  max-width:460px; width:100%;
+  box-shadow:0 0 60px rgba(232,24,90,0.2);
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn {from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.od-icon { font-size:2.5rem; text-align:center; margin-bottom:12px; }
+.od-label {
+  font-size:0.58rem; letter-spacing:4px; text-transform:uppercase;
+  color:var(--primary); text-align:center; margin-bottom:12px;
+}
+.od-arabic {
+  font-family:'Noto Nastaliq Urdu',serif;
+  font-size:1.2rem; color:var(--pink);
+  direction:rtl; text-align:center;
+  line-height:1.9; margin-bottom:10px;
+}
+.od-quote {
+  font-family:'Lora',serif;
+  font-size:1rem; font-style:italic;
+  color:var(--text2); text-align:center;
+  line-height:1.7; margin-bottom:8px;
+}
+.od-source {
+  font-size:0.62rem; letter-spacing:2px;
+  color:var(--muted); text-align:center;
+  margin-bottom:24px;
+}
+.od-close {
+  display:block; width:100%;
+  background:linear-gradient(135deg, var(--primary), var(--magenta));
+  border:none; color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem; letter-spacing:3px; text-transform:uppercase;
+  padding:12px; cursor:pointer; transition:all 0.2s;
+}
+.od-close:hover { box-shadow:0 0 20px var(--primary-glow); }
+
+/* ── TOAST ── */
+#toast {
+  position:fixed; bottom:24px; right:24px;
+  background:var(--surface); border:1px solid var(--primary);
+  color:var(--primary-bright);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.68rem; letter-spacing:2px;
+  padding:11px 18px; z-index:8000;
+  transform:translateY(60px); opacity:0; transition:all 0.3s;
+  box-shadow:0 0 20px rgba(232,24,90,0.2);
+}
+#toast.show{transform:translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<nav id="global-nav">
+  <a href="tasks.html" class="nav-logo">
+    <div class="nav-logo-cube">JB</div>
+    <span class="nav-logo-text">JELLYBYTE STUDIOS</span>
+  </a>
+  <div class="nav-links">
+    <a href="tasks.html" class="nav-link active"><span>⚡</span><span>Daily Tasks</span></a>
+    <a href="timetable.html" class="nav-link"><span>📅</span><span>Week Table</span></a>
+    <a href="projects.html" class="nav-link"><span>🚀</span><span>Projects</span></a>
+    <a href="boards.html" class="nav-link"><span>🗂</span><span>Boards</span></a>
+  </div>
+  <div class="nav-clock" id="nav-clock">--:--</div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Daily Tasks</div>
+      <div class="page-sub">// Schedule your day. One block at a time.</div>
+    </div>
+  </div>
+
+  <!-- REMINDER -->
+  <div id="reminder-banner">
+    <div class="reminder-icon">✨</div>
+    <div class="reminder-body">
+      <div class="reminder-label">Reminder</div>
+      <div class="reminder-arabic" id="r-arabic"></div>
+      <div class="reminder-text" id="r-text"></div>
+      <div class="reminder-source" id="r-source"></div>
+    </div>
+    <button class="reminder-next" onclick="nextReminder()">NEXT ›</button>
+  </div>
+
+  <!-- STATUS -->
+  <div id="status-bar" class="idle">
+    <div class="s-dot"></div>
+    <div>
+      <div class="s-lbl" id="s-lbl">STATUS</div>
+      <div id="s-msg">Loading schedule...</div>
+    </div>
+  </div>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="st-total">0</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n" id="st-done" style="color:var(--green)">0</div><div class="stat-l">Done</div></div>
+    <div class="stat"><div class="stat-n" id="st-left" style="color:var(--yellow)">0</div><div class="stat-l">Left</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="section-hd">// Today's Schedule</div>
+      <div id="empty" class="show">[ No tasks yet — add from the panel ]</div>
+      <div id="task-list"></div>
+    </div>
+
+    <div class="add-panel">
+      <div class="add-title">＋ Add Task</div>
+      <div class="field"><label>Task Name</label><input type="text" id="i-name" placeholder="e.g. AI Class" maxlength="50"></div>
+      <div class="field time-row">
+        <div><label>Start</label><input type="time" id="i-start"></div>
+        <div><label>End</label><input type="time" id="i-end"></div>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select id="i-tag">
+          <option value="class">📚 Class</option>
+          <option value="personal">🎯 Personal / Study</option>
+          <option value="prayer">🕌 Prayer</option>
+          <option value="break">☕ Break</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Icon</label>
+        <div class="emoji-row" id="emoji-row">
+          <button class="e-btn sel" data-e="📌">📌</button>
+          <button class="e-btn" data-e="🤖">🤖</button>
+          <button class="e-btn" data-e="🎲">🎲</button>
+          <button class="e-btn" data-e="🗄️">🗄️</button>
+          <button class="e-btn" data-e="🎮">🎮</button>
+          <button class="e-btn" data-e="💻">💻</button>
+          <button class="e-btn" data-e="🕌">🕌</button>
+          <button class="e-btn" data-e="☕">☕</button>
+          <button class="e-btn" data-e="📖">📖</button>
+          <button class="e-btn" data-e="⚙️">⚙️</button>
+          <button class="e-btn" data-e="✍️">✍️</button>
+          <button class="e-btn" data-e="🔬">🔬</button>
+        </div>
+      </div>
+      <button class="btn-add" onclick="addTask()"><span>＋ Add to Schedule</span></button>
+      <hr class="sep">
+      <button class="btn-clear" onclick="clearAll()">🗑 Clear Today</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERDUE MODAL -->
+<div id="overdue-modal">
+  <div class="od-box">
+    <div class="od-icon" id="od-icon">⏰</div>
+    <div class="od-label">Task Incomplete</div>
+    <div class="od-arabic" id="od-arabic"></div>
+    <div class="od-quote" id="od-quote"></div>
+    <div class="od-source" id="od-source"></div>
+    <button class="od-close" onclick="closeOverdue()">I'll Do Better — Close</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── REMINDERS ──────────────────────────────────────
+const reminders = [
+  { arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا', text: 'Indeed, with hardship comes ease.', source: 'Quran 94:6' },
+  { arabic: 'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ', text: 'Whoever relies upon Allah — He will be sufficient for him.', source: 'Quran 65:3' },
+  { arabic: 'فَاذْكُرُونِي أَذْكُرْكُمْ', text: 'Remember Me, and I will remember you.', source: 'Quran 2:152' },
+  { arabic: 'وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ', text: 'And that there is not for man except that which he strives.', source: 'Quran 53:39' },
+  { arabic: 'رَبِّ زِدْنِي عِلْمًا', text: 'My Lord, increase me in knowledge.', source: 'Quran 20:114' },
+  { arabic: 'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ', text: 'And He is with you wherever you are.', source: 'Quran 57:4' },
+  { arabic: '', text: 'Take benefit of five before five: your youth, your health, your wealth, your free time, and your life.', source: 'Prophet ﷺ — Shu\'ab al-Iman' },
+  { arabic: '', text: 'The best of deeds is that which is done consistently, even if it is small.', source: 'Prophet ﷺ — Bukhari & Muslim' },
+  { arabic: '', text: 'Tie your camel, then put your trust in Allah.', source: 'Prophet ﷺ — Tirmidhi' },
+  { arabic: '', text: 'Seeking knowledge is an obligation upon every Muslim.', source: 'Prophet ﷺ — Ibn Majah' },
+];
+
+// OVERDUE quotes — mix of discipline + encouragement + Quran/Sunnah
+const overdueQuotes = [
+  { icon:'🕌', arabic:'إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوْمٍ حَتَّىٰ يُغَيِّرُوا مَا بِأَنفُسِهِمْ', text:'Indeed, Allah will not change the condition of a people until they change what is in themselves.', source:'Quran 13:11' },
+  { icon:'⏰', arabic:'', text:'Discipline is choosing between what you want NOW and what you want MOST. Rise up — your future self is watching.', source:'Motivational' },
+  { icon:'🕌', arabic:'وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ', text:'Man gets nothing except what he strives for. You missed this one — seize the next.', source:'Quran 53:39' },
+  { icon:'💪', arabic:'', text:'Every master was once a beginner. Every pro was once an amateur. Missing one task doesn\'t define you — quitting does.', source:'Motivational' },
+  { icon:'🕌', arabic:'إِنَّ مَعَ الْعُسْرِ يُسْرًا', text:'With hardship comes ease. This delay is not defeat — but the next task cannot wait.', source:'Quran 94:6' },
+  { icon:'🔥', arabic:'', text:'Your goals don\'t care about your excuses. Get up, show up, level up. JellyByte Studios doesn\'t build itself.', source:'Inner Discipline' },
+  { icon:'🕌', arabic:'', text:'The strong person is not the one who overcomes others by force, but the one who controls himself when angry — and when lazy.', source:'Prophet ﷺ — Bukhari' },
+  { icon:'⚔️', arabic:'', text:'Champions aren\'t born in gyms. They\'re built in the moments when they choose to work when they don\'t want to. That moment is now.', source:'Motivational' },
+  { icon:'🕌', arabic:'', text:'Make things easy, not difficult. But ease comes AFTER the work — not instead of it.', source:'Prophet ﷺ — Bukhari' },
+  { icon:'🌅', arabic:'', text:'Yesterday\'s missed task cannot be recovered. But the next hour? That\'s yours to own. Take it.', source:'Inner Discipline' },
+];
+
+let rIdx = Math.floor(Math.random() * reminders.length);
+let overdueShown = {};
+
+function showReminder() {
+  const r = reminders[rIdx];
+  document.getElementById('r-arabic').textContent = r.arabic;
+  document.getElementById('r-text').textContent = '"' + r.text + '"';
+  document.getElementById('r-source').textContent = '— ' + r.source;
+}
+function nextReminder() {
+  rIdx = (rIdx + 1) % reminders.length;
+  showReminder();
+}
+setInterval(() => { rIdx = (rIdx + 1) % reminders.length; showReminder(); }, 600000);
+
+// ── TASKS ──────────────────────────────────────────
+const SK = 'jb_tasks';
+const DK = 'jb_date';
+let tasks = [];
+let selEmoji = '📌';
+
+function checkDay() {
+  const today = new Date().toISOString().slice(0,10);
+  if (localStorage.getItem(DK) !== today) {
+    localStorage.setItem(DK, today);
+    overdueShown = {};
+  }
+}
+
+function load() {
+  checkDay();
+  const r = localStorage.getItem(SK);
+  tasks = r ? JSON.parse(r) : [];
+  render(); tick();
+}
+
+function save() { localStorage.setItem(SK, JSON.stringify(tasks)); }
+
+function addTask() {
+  const name  = document.getElementById('i-name').value.trim();
+  const start = document.getElementById('i-start').value;
+  const end   = document.getElementById('i-end').value;
+  const tag   = document.getElementById('i-tag').value;
+  if (!name)  { toast('Enter a task name'); return; }
+  if (!start) { toast('Set a start time'); return; }
+  if (!end)   { toast('Set an end time'); return; }
+  if (start >= end) { toast('End must be after start'); return; }
+  tasks.push({ id: Date.now(), name, start, end, tag, emoji: selEmoji, done: false });
+  tasks.sort((a,b)=>a.start.localeCompare(b.start));
+  save(); render(); tick();
+  document.getElementById('i-name').value = '';
+  toast('Task added ✓');
+}
+
+function markDone(id) {
+  const t = tasks.find(t=>t.id===id);
+  if (!t) return;
+  t.done = !t.done;
+  save(); render(); tick();
+  if (t.done) toast('✓ Task marked complete!');
+}
+
+function delTask(id) {
+  tasks = tasks.filter(t=>t.id!==id);
+  save(); render(); tick();
+}
+
+function clearAll() {
+  if (!tasks.length) return;
+  if (confirm('Clear all tasks for today?')) { tasks=[]; save(); render(); tick(); }
+}
+
+function render() {
+  const list = document.getElementById('task-list');
+  const empty = document.getElementById('empty');
+  if (!tasks.length) { list.innerHTML=''; empty.classList.add('show'); return; }
+  empty.classList.remove('show');
+  list.innerHTML = tasks.map(t=>`
+    <div class="task-card upcoming" id="tc-${t.id}">
+      <div class="t-time">${fmt(t.start)}<br>▾<br>${fmt(t.end)}</div>
+      <div class="t-name">${t.emoji} ${esc(t.name)}</div>
+      <span class="t-tag tag-${t.tag}">${t.tag}</span>
+      <button class="t-done-btn" onclick="markDone(${t.id})" title="Mark done">✓</button>
+      <button class="t-del" onclick="delTask(${t.id})">✕</button>
+    </div>`).join('');
+}
+
+function tick() {
+  const now = nm();
+  let active=null, next=null, done=0, overdue=0;
+  tasks.forEach(t=>{
+    const s=tm(t.start), e=tm(t.end);
+    const card=document.getElementById(`tc-${t.id}`);
+    if(!card) return;
+    card.className='task-card';
+
+    if (t.done) {
+      card.classList.add('done'); done++;
+    } else if(now>=e) {
+      // Overdue and not done
+      card.classList.add('overdue-c'); overdue++;
+      // Trigger overdue modal once per task per session
+      if (!overdueShown[t.id]) {
+        overdueShown[t.id] = true;
+        setTimeout(()=>showOverdue(t), 800);
+      }
+    } else if(now>=s && now<e) {
+      card.classList.add('active'); active=t;
+    } else if(now>=s-10 && now<s) {
+      card.classList.add('soon-c'); if(!next)next=t;
+    } else {
+      card.classList.add('upcoming'); if(!next&&now<s)next=t;
+    }
+  });
+
+  document.getElementById('st-total').textContent=tasks.length;
+  document.getElementById('st-done').textContent=done;
+  document.getElementById('st-left').textContent=tasks.length-done;
+  document.getElementById('prog-fill').style.width=tasks.length?(done/tasks.length*100)+'%':'0%';
+
+  const bar=document.getElementById('status-bar');
+  const lbl=document.getElementById('s-lbl');
+  const msg=document.getElementById('s-msg');
+  if(!tasks.length){bar.className='status-bar idle';lbl.textContent='NO TASKS';msg.textContent='Add tasks from the panel →';}
+  else if(active){bar.className='';lbl.textContent='ACTIVE';msg.textContent=`${active.emoji} ${active.name} — ${tm(active.end)-now} min remaining`;}
+  else if(overdue>0&&!active){bar.className='overdue';lbl.textContent='OVERDUE';msg.textContent=`${overdue} task(s) missed — mark them done when complete`;}
+  else if(next){const d=tm(next.start)-now;if(d<=10){bar.className='soon';lbl.textContent='INCOMING';msg.textContent=`${next.emoji} ${next.name} in ${d} min`;}else{bar.className='idle';lbl.textContent='NEXT UP';msg.textContent=`${next.emoji} ${next.name} in ${d} min`;}}
+  else if(done===tasks.length&&tasks.length>0){bar.className='';lbl.textContent='COMPLETE';msg.textContent='All tasks done. Alhamdulillah. 🌙';}
+  else{bar.className='idle';lbl.textContent='STANDBY';msg.textContent='—';}
+}
+
+// ── OVERDUE MODAL ──────────────────────────────────
+let overdueQueue = [];
+let overdueActive = false;
+
+function showOverdue(task) {
+  overdueQueue.push(task);
+  if (!overdueActive) processOverdueQueue();
+}
+
+function processOverdueQueue() {
+  if (!overdueQueue.length) { overdueActive=false; return; }
+  overdueActive = true;
+  const task = overdueQueue.shift();
+  const q = overdueQuotes[Math.floor(Math.random() * overdueQuotes.length)];
+  document.getElementById('od-icon').textContent = q.icon;
+  document.getElementById('od-arabic').textContent = q.arabic;
+  document.getElementById('od-quote').textContent = '"' + q.text + '"';
+  document.getElementById('od-source').textContent = '— ' + q.source;
+  document.getElementById('overdue-modal').classList.add('show');
+}
+
+function closeOverdue() {
+  document.getElementById('overdue-modal').classList.remove('show');
+  setTimeout(processOverdueQueue, 400);
+}
+
+// ── UTILS ──────────────────────────────────────────
+function tm(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function nm(){const n=new Date();return n.getHours()*60+n.getMinutes();}
+function pad(n){return String(n).padStart(2,'0');}
+function fmt(t){const[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';return`${h%12||12}:${pad(m)} ${ap}`;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+document.getElementById('emoji-row').addEventListener('click',e=>{
+  const btn=e.target.closest('.e-btn'); if(!btn)return;
+  document.querySelectorAll('.e-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); selEmoji=btn.dataset.e;
+});
+
+document.getElementById('i-name').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+
+setInterval(()=>{
+  const n=new Date();
+  document.getElementById('nav-clock').textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}`;
+},1000);
+
+showReminder();
+load();
+setInterval(tick, 30000);
+</script>
+</body>
+</html>
